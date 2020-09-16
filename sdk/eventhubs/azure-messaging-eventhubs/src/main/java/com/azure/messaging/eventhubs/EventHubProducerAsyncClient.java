@@ -110,6 +110,7 @@ public class EventHubProducerAsyncClient implements Closeable {
     private final Scheduler scheduler;
     private final boolean isSharedConnection;
     private final Runnable onClientClose;
+    private Integer linkSizeFromService;
 
     /**
      * Creates a new instance of this {@link EventHubProducerAsyncClient} that can send messages to a single partition
@@ -246,6 +247,45 @@ public class EventHubProducerAsyncClient implements Closeable {
                     return Mono.just(new EventDataBatch(batchSize, partitionId, partitionKey, link::getErrorContext,
                         tracerProvider, link.getEntityPath(), link.getHostname()));
                 }));
+    }
+
+    public EventDataBatch createBatchSync(CreateBatchOptions options) {
+        if (options == null) {
+            throw logger.logExceptionAsError(new NullPointerException("'options' cannot be null."));
+        }
+
+        final String partitionKey = options.getPartitionKey();
+        final String partitionId = options.getPartitionId();
+        final int batchMaxSize = options.getMaximumSizeInBytes();
+
+        if (!CoreUtils.isNullOrEmpty(partitionKey)
+            && !CoreUtils.isNullOrEmpty(partitionId)) {
+            throw logger.logExceptionAsError(new IllegalArgumentException(String.format(Locale.US,
+                "CreateBatchOptions.getPartitionKey() and CreateBatchOptions.getPartitionId() are both set. "
+                    + "Only one or the other can be used. partitionKey: '%s'. partitionId: '%s'",
+                partitionKey, partitionId)));
+        } else if (!CoreUtils.isNullOrEmpty(partitionKey)
+            && partitionKey.length() > MAX_PARTITION_KEY_LENGTH) {
+            throw logger.logExceptionAsError(new IllegalArgumentException(String.format(Locale.US,
+                "Partition key '%s' exceeds the maximum allowed length: '%s'.", partitionKey,
+                MAX_PARTITION_KEY_LENGTH)));
+        }
+        AmqpSendLink link = getSendLink(partitionId).block();
+        if (this.linkSizeFromService == null) {
+            this.linkSizeFromService = link.getLinkSize().block();  // this will run only once
+        }
+        int maximumLinkSize = this.linkSizeFromService > 0? this.linkSizeFromService : MAX_MESSAGE_LENGTH_BYTES;
+        if (batchMaxSize > maximumLinkSize) {
+            throw logger.logExceptionAsError(
+                new IllegalArgumentException(String.format(Locale.US,
+                    "BatchOptions.maximumSizeInBytes (%s bytes) is larger than the link size (%s bytes).",
+                    batchMaxSize, maximumLinkSize)));
+        }
+        final int batchSize = batchMaxSize > 0
+            ? batchMaxSize
+            : maximumLinkSize;
+        return new EventDataBatch(batchSize, partitionId, partitionKey, link::getErrorContext,
+            tracerProvider, link.getEntityPath(), link.getHostname());
     }
 
     /**
