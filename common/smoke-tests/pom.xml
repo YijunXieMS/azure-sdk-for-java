@@ -118,19 +118,39 @@
     <dependency>
       <groupId>com.azure</groupId>
       <artifactId>azure-cosmos</artifactId>
-      <version>4.8.0</version> <!-- {x-version-update;com.azure:azure-cosmos;dependency} -->
+      <version>4.10.0</version> <!-- {x-version-update;com.azure:azure-cosmos;dependency} -->
     </dependency>
 
     <dependency>
       <groupId>com.azure</groupId>
       <artifactId>azure-identity</artifactId>
-      <version>1.2.0</version> <!-- {x-version-update;com.azure:azure-identity;dependency} -->
+      <version>1.2.1</version> <!-- {x-version-update;com.azure:azure-identity;dependency} -->
     </dependency>
 
     <dependency>
       <groupId>com.azure</groupId>
+      <artifactId>azure-security-keyvault-keys</artifactId>
+      <version>4.3.0-beta.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-security-keyvault-certificates</artifactId>
+      <version>4.2.0-beta.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-security-keyvault-administration</artifactId>
+      <version>4.0.0-beta.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
       <artifactId>azure-security-keyvault-secrets</artifactId>
-      <version>4.3.0-beta.2</version> <!-- {x-version-update;com.azure:azure-security-keyvault-secrets;dependency} -->
+      <version>4.3.0-beta.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-security-keyvault-jca</artifactId>
+      <version>1.0.0-beta.2</version>
     </dependency>
 
     <dependency>
@@ -147,8 +167,101 @@
 
     <dependency>
       <groupId>com.azure</groupId>
+      <artifactId>azure-messaging-eventgrid</artifactId>
+      <version>2.0.0-beta.3</version> <!-- {x-version-update;com.azure:azure-messaging-eventhubs-checkpointstore-blob;dependency} -->
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-messaging-servicebus</artifactId>
+      <version>7.0.0</version> <!-- {x-version-update;com.azure:azure-messaging-eventhubs-checkpointstore-blob;dependency} -->
+    </dependency>
+
+    <dependency>
+      <groupId>com.azure</groupId>
       <artifactId>azure-storage-blob</artifactId>
-      <version>12.9.0</version> <!-- {x-version-update;com.azure:azure-storage-blob;dependency} -->
+      <version>12.10.0-beta.1</version> <!-- {x-version-update;com.azure:azure-storage-blob;dependency} -->
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-blob-batch</artifactId>
+      <version>12.8.0-beta.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-blob-cryptography</artifactId>
+      <version>12.10.0-beta.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-blob-changefeed</artifactId>
+      <version>12.0.0-beta.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-blob-nio</artifactId>
+      <version>12.0.0-beta.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-file-share</artifactId>
+      <version>12.8.0-beta.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-storage-file-datalake</artifactId>
+      <version>12.4.0-beta.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-data-tables</artifactId>
+      <version>12.0.0-beta.3</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-data-appconfiguration</artifactId>
+      <version>1.1.7</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-ai-anomalydetector</artifactId>
+      <version>3.0.0-beta.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-communication-administration</artifactId>
+      <version>1.0.0-beta.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-communication-chat</artifactId>
+      <version>1.0.0-beta.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-communication-sms</artifactId>
+      <version>1.0.0-beta.4</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-ai-formrecognizer</artifactId>
+      <version>3.1.0-beta.1</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-ai-metricsadvisor</artifactId>
+      <version>1.0.0-beta.2</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-ai-textanalytics</artifactId>
+      <version>5.1.0-beta.3</version>
+    </dependency>
+    <dependency>
+      <groupId>com.azure</groupId>
+      <artifactId>azure-search-documents</artifactId>
+      <version>11.2.0-beta.3</version>
     </dependency>
 
     <dependency>

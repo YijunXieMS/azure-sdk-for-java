@@ -9,6 +9,13 @@
         "baseName": {
             "type": "string"
         },
+        "sku": {
+          "defaultValue": "Standard",
+          "type": "string",
+          "metadata": {
+            "description": "sku type defined here."
+          }
+        },
         "testApplicationId": {
             "type": "string"
         },
@@ -26,6 +33,14 @@
         },
         "azureCloud": {
             "type": "string"
+        },
+        "configurationStores_azconfig_java_name": {
+          "defaultValue": "azconfig-java",
+          "type": "string"
+        },
+        "azEndpointSuffix": {
+          "defaultValue": ".azconfig.io",
+          "type": "string"
         }
     },
     "variables": {
@@ -33,7 +48,10 @@
         "eventHubNamespaceName": "[format('eh-smoke-{0}', parameters('baseName'))]",
         "eventHubName": "myeventhub",
         "eventHubAuthorizationRuleName": "RootManageSharedAccessKey",
-        "storageAccountName": "[format('stsmoke{0}', parameters('baseName'))]"
+        "storageAccountName": "[format('stsmoke{0}', parameters('baseName'))]",
+        "azConfigName": "[concat(parameters('baseName'),'-' , parameters('configurationStores_azconfig_java_name'))]",
+        "azEndpointValue": "[concat('https://', parameters('baseName'), '-', parameters('configurationStores_azconfig_java_name'), parameters('azEndpointSuffix'))]",
+        "location": "[resourceGroup().location]"
     },
     "resources": [
         {
@@ -234,6 +252,18 @@
             "properties": {
                 "publicAccess": "None"
             }
+        },
+        {
+          "type": "Microsoft.AppConfiguration/configurationStores",
+          "apiVersion": "2019-10-01",
+          "name": "[variables('uniqueAzConfigName')]",
+          "location":"[resourceGroup().location]",
+          "sku": {
+            "name": "[parameters('sku')]"
+          },
+          "properties": {
+            "endpoint":"[variables('azEndpointValue')]"
+          }
         }
     ],
     "outputs": {
@@ -264,6 +294,10 @@
         "AZURE_STORAGE_CONNECTION_STRING": {
             "type": "string",
             "value": "[concat('DefaultEndpointsProtocol=https;AccountName=', variables('storageAccountName'), ';AccountKey=', listKeys(resourceId('Microsoft.Storage/storageAccounts', variables('storageAccountName')), '2019-06-01').keys[0].value, ';EndpointSuffix=', parameters('storageEndpointSuffix'))]"
+        },
+        "AZURE_APPCONFIG_CONNECTION_STRING": {
+          "type": "string",
+          "value": "[listKeys(resourceId('Microsoft.AppConfiguration/configurationStores',variables('azConfigName')), '2019-02-01-preview').value[0].connectionString]"
         }
     }
 }

@@ -73,8 +73,12 @@ Run `App.main()`:
 All the classes in this sample not depend on each other. 
 
 It is possible to run them individually:
+
 ```java
 package com.azure.smoketest;
+
+import com.azure.smoketest.storage.StorageBlob;
+
 import java.io.IOException;
 
 public class App {

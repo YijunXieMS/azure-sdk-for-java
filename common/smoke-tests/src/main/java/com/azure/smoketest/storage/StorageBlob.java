@@ -1,10 +1,13 @@
 // Copyright (c) Microsoft Corporation. All rights reserved.
 // Licensed under the MIT License.
-package com.azure.smoketest;
+package com.azure.smoketest.storage;
 
+import com.azure.core.http.rest.PagedIterable;
 import com.azure.storage.blob.BlobClient;
 import com.azure.storage.blob.BlobServiceClientBuilder;
 import com.azure.storage.blob.BlobServiceClient;
+import com.azure.storage.blob.models.AccessTier;
+import com.azure.storage.blob.models.DeleteSnapshotsOptionType;
 import com.azure.storage.blob.specialized.BlockBlobClient;
 import com.azure.storage.blob.BlobContainerClient;
 import com.azure.storage.blob.models.BlobItem;
@@ -13,7 +16,9 @@ import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 public class StorageBlob {
     private static BlobContainerClient containerClient;
@@ -26,7 +31,7 @@ public class StorageBlob {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StorageBlob.class);
 
-    private static void uploadBlob() throws IOException {
+    private static void uploadBlob() {
         LOGGER.info("Uploading blob... ");
         String text = "This is a sample block blob created for SDK Smoke Test in Java!";
         ByteArrayInputStream data = new ByteArrayInputStream(text.getBytes());

@@ -3,6 +3,10 @@
 package com.azure.smoketest;
 
 import java.io.IOException;
+
+import com.azure.smoketest.keyvault.KeyVaultSecrets;
+import com.azure.smoketest.messaging.EventHubs;
+import com.azure.smoketest.storage.StorageBlob;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -19,6 +23,7 @@ public class App {
         EventHubs.main(null);
         // Disabling until cosmos ships from master
         // CosmosDB.main(null);
+        AppConfiguration.main(null);
 
     }
 }
