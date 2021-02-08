@@ -11,7 +11,6 @@ public class ServiceBus {
     private static ServiceBusReceiverClient receiverClient;
     private static ServiceBusSenderClient senderClient;
 
-
     private static void sendEvent() {
         senderClient.sendMessage(new ServiceBusMessage("test message"));
     }
@@ -24,7 +23,7 @@ public class ServiceBus {
         receiverClient = new ServiceBusClientBuilder()
             .connectionString(System.getenv("AZURE_SERVICEBUS_EVENT_HUB_NAME"))
             .receiver()
-            .queueName("SERVICE_QUEUE_NAME")
+            .queueName("AZURE_SERVICEBUS_SMOKE_QUEUE_NAME")
             .buildClient();
 
         senderClient = new ServiceBusClientBuilder()

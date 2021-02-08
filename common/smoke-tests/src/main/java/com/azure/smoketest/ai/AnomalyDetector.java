@@ -15,6 +15,8 @@ import com.azure.core.http.HttpPipelineBuilder;
 import com.azure.core.http.policy.AddHeadersPolicy;
 import com.azure.core.http.policy.AzureKeyCredentialPolicy;
 import com.azure.core.http.policy.HttpPipelinePolicy;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -25,9 +27,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 public class AnomalyDetector {
+    private static final String AZURE_ANOMALY_DETECTOR_ENDPOINT = System.getenv("AZURE_ANOMALY_DETECTOR_ENDPOINT");
+    private static final String AZURE_ANOMALY_DETECTOR_API_KEY = System.getenv("AZURE_ANOMALY_DETECTOR_API_KEY");
     private static AnomalyDetectorClient anomalyDetectorClient;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AnomalyDetector.class);
 
     private static void timeSeries() throws IOException {
+        LOGGER.info("Detecting time series...");
         // Read the time series from csv file and organize the time series into list of TimeSeriesPoint.
         // The sample csv file has no header, and it contains 2 columns, namely timestamp and value.
         // The following is a snippet of the sample csv file:
@@ -57,35 +63,36 @@ public class AnomalyDetector {
         request.setGranularity(TimeGranularity.DAILY);
         EntireDetectResponse response = anomalyDetectorClient.detectEntireSeries(request);
         if (response.getIsAnomaly().contains(true)) {
-            System.out.println("Anomalies found in the following data positions:");
+            LOGGER.info("Anomalies found in the following data positions:");
             for (int i = 0; i < request.getSeries().size(); ++i) {
                 if (response.getIsAnomaly().get(i)) {
                     System.out.print(i + " ");
                 }
             }
-            System.out.println();
         } else {
-            System.out.println("No anomalies were found in the series.");
+            LOGGER.info("No anomalies were found in the series.");
         }
+        LOGGER.info("DONE: detecting anomalies");
     }
 
     public static void main(final String[] args) throws IOException {
-        String endpoint = System.getenv("AZURE_ANOMALY_DETECTOR_ENDPOINT");
-        String key = "AZURE_ANOMALY_DETECTOR_API_KEY";
+        LOGGER.info("---------------------");
+        LOGGER.info("ANOMALY DETECTOR");
+        LOGGER.info("---------------------");
         HttpHeaders headers = new HttpHeaders()
             .put("Accept", ContentType.APPLICATION_JSON);
 
         HttpPipelinePolicy authPolicy = new AzureKeyCredentialPolicy("Ocp-Apim-Subscription-Key",
-            new AzureKeyCredential(key));
+            new AzureKeyCredential(AZURE_ANOMALY_DETECTOR_API_KEY));
         AddHeadersPolicy addHeadersPolicy = new AddHeadersPolicy(headers);
-
         HttpPipeline httpPipeline = new HttpPipelineBuilder().httpClient(HttpClient.createDefault())
             .policies(authPolicy, addHeadersPolicy).build();
         // Instantiate a client that will be used to call the service.
         anomalyDetectorClient = new AnomalyDetectorClientBuilder()
             .pipeline(httpPipeline)
-            .endpoint(endpoint)
+            .endpoint(AZURE_ANOMALY_DETECTOR_ENDPOINT)
             .buildClient();
+
         timeSeries();
     }
 }

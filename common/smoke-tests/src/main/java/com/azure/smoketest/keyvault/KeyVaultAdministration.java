@@ -11,6 +11,9 @@ import com.azure.security.keyvault.administration.models.KeyVaultRestoreOperatio
 import com.azure.security.keyvault.administration.models.KeyVaultRoleAssignment;
 import com.azure.security.keyvault.administration.models.KeyVaultRoleDefinition;
 import com.azure.security.keyvault.administration.models.KeyVaultRoleScope;
+import com.azure.smoketest.ai.TextAnalytics;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,17 +25,18 @@ public class KeyVaultAdministration {
 
     private static KeyVaultAccessControlClient accessControlClient;
     private static KeyVaultBackupClient backupClient;
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeyVaultAdministration.class);
 
     private static void createAndDeleteRoleAssignment() {
         List<KeyVaultRoleDefinition> roleDefinitions = new ArrayList<>();
 
         for (KeyVaultRoleDefinition roleDefinition : accessControlClient.listRoleDefinitions(KeyVaultRoleScope.GLOBAL)) {
             roleDefinitions.add(roleDefinition);
-            System.out.printf("Retrieved role definition with name: %s %n", roleDefinition.getName());
+            LOGGER.info("Retrieved role definition with name: {} %n", roleDefinition.getName());
         }
 
         for (KeyVaultRoleAssignment roleAssignment : accessControlClient.listRoleAssignments(KeyVaultRoleScope.GLOBAL)) {
-            System.out.printf("Retrieved role assignment with name: %s %n", roleAssignment.getName());
+            LOGGER.info("Retrieved role assignment with name: {} %n", roleAssignment.getName());
         }
 
         KeyVaultRoleDefinition roleDefinition = roleDefinitions.get(0);
@@ -40,25 +44,27 @@ public class KeyVaultAdministration {
             accessControlClient.createRoleAssignment(KeyVaultRoleScope.GLOBAL, roleDefinition.getId(),
                 SERVICE_PRINCIPLE_ID);
 
-        System.out.printf("Created role assignment with name: %s %n", createdRoleAssignment.getName());
+        LOGGER.info("Created role assignment with name: {} %n", createdRoleAssignment.getName());
 
         /* To get an existing role assignment, we'll need the 'name' property from an existing assignment. Let's use the
         createdAssignment from the previous example. */
         KeyVaultRoleAssignment retrievedRoleAssignment =
             accessControlClient.getRoleAssignment(KeyVaultRoleScope.GLOBAL, createdRoleAssignment.getName());
 
-        System.out.printf("Retrieved role assignment with name: %s %n", retrievedRoleAssignment.getName());
+        LOGGER.info("Retrieved role assignment with name: {} %n", retrievedRoleAssignment.getName());
 
         /* To remove a role assignment from a service principal, the role assignment must be deleted. Let's delete the
         createdAssignment from the previous example. */
         KeyVaultRoleAssignment deletedRoleAssignment =
             accessControlClient.deleteRoleAssignment(KeyVaultRoleScope.GLOBAL, createdRoleAssignment.getName());
 
-        System.out.printf("Deleted role assignment with name: %s %n", deletedRoleAssignment.getName());
+        LOGGER.info("Deleted role assignment with name: {} %n", deletedRoleAssignment.getName());
     }
 
     private static void backupAndRestore() {
         String sasToken = "<sas-token>";
+        // TODO: is it possible to create a SAS token from storage connection string or use a
+        //  blob storage account connection string?
         SyncPoller<KeyVaultBackupOperation, String> backupPoller = backupClient.beginBackup(BACKUP_BLOB_STORAGE_URL,
             sasToken);
 
@@ -73,6 +79,9 @@ public class KeyVaultAdministration {
     }
 
     public static void main(String[] args) {
+        LOGGER.info("---------------------");
+        LOGGER.info("KEY VAULT ADMINISTRATION");
+        LOGGER.info("---------------------");
         accessControlClient = new KeyVaultAccessControlClientBuilder()
             .vaultUrl(KEY_VAULT_URL)
             .credential(new DefaultAzureCredentialBuilder().build())
@@ -84,6 +93,6 @@ public class KeyVaultAdministration {
             .buildClient();
 
         createAndDeleteRoleAssignment();
-        backupAndRestore();
+        // backupAndRestore();  // to enable it after the above to-do question is clarified.
     }
 }

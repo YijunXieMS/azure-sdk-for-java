@@ -7,6 +7,8 @@ import com.azure.ai.formrecognizer.models.FormRecognizerOperationResult;
 import com.azure.ai.formrecognizer.models.FormTable;
 import com.azure.core.credential.AzureKeyCredential;
 import com.azure.core.util.polling.SyncPoller;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -16,10 +18,14 @@ import java.nio.file.Files;
 import java.util.List;
 
 public class FormRecognizer {
+    private static final String AZURE_FORM_RECOGNIZER_KEY = System.getenv("AZURE_FORM_RECOGNIZER_KEY");
+    private static final String AZURE_FORM_RECOGNIZER_ENDPOINT = System.getenv("AZURE_FORM_RECOGNIZER_ENDPOINT");
     private static FormRecognizerClient client;
+    private static final Logger LOGGER = LoggerFactory.getLogger(FormRecognizer.class);
 
     private static void recognizeContent() throws IOException  {
-        File sourceFile = new File("../data/Form_1.jpg");
+        LOGGER.info("Recognizing content...");
+        File sourceFile = new File("./src/java/data/Form_1.jpg");
         byte[] fileContent = Files.readAllBytes(sourceFile.toPath());
         InputStream targetStream = new ByteArrayInputStream(fileContent);
 
@@ -30,31 +36,31 @@ public class FormRecognizer {
 
         for (int i = 0; i < contentPageResults.size(); i++) {
             final FormPage formPage = contentPageResults.get(i);
-            System.out.printf("---- Recognized content info for page %d ----%n", i);
+            LOGGER.info("---- Recognized content info for page {} ----", i);
             // Table information
-            System.out.printf("Has width: %.2f and height: %.2f, measured with unit: %s%n", formPage.getWidth(),
-                formPage.getHeight(),
-                formPage.getUnit());
+            LOGGER.info("Has width: {} and height: {}, measured with unit: {}", formPage.getWidth(),
+                formPage.getHeight(), formPage.getUnit());
             final List<FormTable> tables = formPage.getTables();
             for (int i1 = 0; i1 < tables.size(); i1++) {
                 final FormTable formTable = tables.get(i1);
-                System.out.printf("Table %d has %d rows and %d columns.%n", i1, formTable.getRowCount(),
+                LOGGER.info("Table {} has {} rows and {} columns.", i1, formTable.getRowCount(),
                     formTable.getColumnCount());
                 formTable.getCells().forEach(formTableCell -> {
-                    System.out.printf("Cell has text '%s', within bounding box %s.%n", formTableCell.getText(),
+                    LOGGER.info("Cell has text '{}', within bounding box {}.", formTableCell.getText(),
                         formTableCell.getBoundingBox().toString());
                 });
-                System.out.println();
             }
         }
+        LOGGER.info("DONE: recognizing content");
     }
 
     public static void main(String[] args) throws IOException {
+        LOGGER.info("---------------------");
+        LOGGER.info("FORM RECOGNIZER");
+        LOGGER.info("---------------------");
         client = new FormRecognizerClientBuilder()
-            .credential(new AzureKeyCredential(System.getenv("AZURE_FORM_RECOGNIZER_KEY")))
-            .endpoint(String.format("https://%s.cognitiveservices.azure.com/",
-                System.getenv("AZURE_FORM_RECOGNIZER_ENDPOINT"))
-            )
+            .credential(new AzureKeyCredential(AZURE_FORM_RECOGNIZER_KEY))
+            .endpoint(String.format("https://%s.cognitiveservices.azure.com/", AZURE_FORM_RECOGNIZER_ENDPOINT))
             .buildClient();
 
         recognizeContent();

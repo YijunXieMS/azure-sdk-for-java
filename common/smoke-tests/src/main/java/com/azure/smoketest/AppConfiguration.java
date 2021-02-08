@@ -8,8 +8,8 @@ import org.slf4j.LoggerFactory;
 
 public class AppConfiguration {
     private static final String APP_CONFIG_CONNECTION_STRING = System.getenv("AZURE_APPCONFIG_CONNECTION_STRING");
-    private static final Logger LOGGER = LoggerFactory.getLogger(AppConfiguration.class);
     private static ConfigurationClient client;
+    private static final Logger LOGGER = LoggerFactory.getLogger(AppConfiguration.class);
 
     private static void setAndGetConfigSettings() {
         // Name of the key to add to the configuration service.
@@ -37,7 +37,7 @@ public class AppConfiguration {
         LOGGER.info("APP CONFIG");
         LOGGER.info("---------------------");
         client = new ConfigurationClientBuilder()
-            .connectionString("APP_CONFIG_CONNECTION_STRING")
+            .connectionString(APP_CONFIG_CONNECTION_STRING)
             .buildClient();
         setAndGetConfigSettings();
     }

@@ -15,6 +15,8 @@ import com.azure.security.keyvault.certificates.models.DeletedCertificate;
 import com.azure.security.keyvault.certificates.models.KeyVaultCertificate;
 import com.azure.security.keyvault.certificates.models.KeyVaultCertificateWithPolicy;
 import com.azure.security.keyvault.certificates.models.SubjectAlternativeNames;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.Arrays;
 import java.util.HashMap;
@@ -23,6 +25,7 @@ import java.util.Map;
 public class KeyVaultCertificates {
     private final static String KEY_VAULT_URL = System.getenv("AZURE_KEY_VAULT_URL");
     private static CertificateClient certificateClient;
+    private static final Logger LOGGER = LoggerFactory.getLogger(KeyVaultCertificates.class);
 
     private static void createAndDeleteCertificate() throws InterruptedException {
         // Let's create a self signed certificate valid for 1 year. if the certificate
@@ -36,31 +39,31 @@ public class KeyVaultCertificates {
         Map<String, String> tags = new HashMap<>();
         tags.put("foo", "bar");
 
-        SyncPoller<CertificateOperation, KeyVaultCertificateWithPolicy> certificatePoller = certificateClient.beginCreateCertificate("certificateName92", policy, true, tags);
+        SyncPoller<CertificateOperation, KeyVaultCertificateWithPolicy> certificatePoller = certificateClient.beginCreateCertificate("certificateName", policy, true, tags);
         certificatePoller.waitUntil(LongRunningOperationStatus.SUCCESSFULLY_COMPLETED);
 
         KeyVaultCertificate cert = certificatePoller.getFinalResult();
 
         // Let's Get the latest version of the certificate from the key vault.
         KeyVaultCertificate certificate = certificateClient.getCertificate("certificateName");
-        System.out.printf("Certificate is returned with name %s and secret id %s \n", certificate.getProperties().getName(),
+        LOGGER.info("Certificate is returned with name {} and secret id {} \n", certificate.getProperties().getName(),
             certificate.getSecretId());
 
         // After some time, we need to disable the certificate temporarily, so we update the enabled status of the certificate.
         // The update method can be used to update the enabled status of the certificate.
         certificate.getProperties().setEnabled(false);
         KeyVaultCertificate updatedCertificate = certificateClient.updateCertificateProperties(certificate.getProperties());
-        System.out.printf("Certificate's updated enabled status is %s \n", updatedCertificate.getProperties().isEnabled());
+        LOGGER.info("Certificate's updated enabled status is {} \n", updatedCertificate.getProperties().isEnabled());
 
 
         //Let's create a certificate issuer.
         CertificateIssuer issuer = new CertificateIssuer("myIssuer", "Test");
         CertificateIssuer myIssuer = certificateClient.createIssuer(issuer);
-        System.out.printf("Issuer created with name %s and provider %s", myIssuer.getName(), myIssuer.getProvider());
+        LOGGER.info("Issuer created with name {} and provider {}", myIssuer.getName(), myIssuer.getProvider());
 
         // Let's fetch the issuer we just created from the key vault.
         myIssuer = certificateClient.getIssuer("myIssuer");
-        System.out.printf("Issuer retrieved with name %s and provider %s", myIssuer.getName(), myIssuer.getProvider());
+        LOGGER.info("Issuer retrieved with name {} and provider {}", myIssuer.getName(), myIssuer.getProvider());
 
 
         //Let's create a certificate signed by our issuer.
@@ -70,7 +73,7 @@ public class KeyVaultCertificates {
 
         // Let's Get the latest version of our certificate from the key vault.
         KeyVaultCertificate myCert = certificateClient.getCertificate("myCertificate");
-        System.out.printf("Certificate is returned with name %s and secret id %s \n", myCert.getProperties().getName(),
+        LOGGER.info("Certificate is returned with name {} and secret id {} \n", myCert.getProperties().getName(),
             myCert.getSecretId());
 
         // The certificates and issuers are no longer needed, need to delete it from the key vault.
@@ -78,7 +81,7 @@ public class KeyVaultCertificates {
             certificateClient.beginDeleteCertificate("certificateName");
         // Deleted Certificate is accessible as soon as polling beings.
         PollResponse<DeletedCertificate> pollResponse = deletedCertificatePoller.poll();
-        System.out.printf("Deleted certificate with name %s and recovery id %s", pollResponse.getValue().getName(),
+        LOGGER.info("Deleted certificate with name {} and recovery id {}", pollResponse.getValue().getName(),
             pollResponse.getValue().getRecoveryId());
         deletedCertificatePoller.waitForCompletion();
 
@@ -86,12 +89,12 @@ public class KeyVaultCertificates {
             certificateClient.beginDeleteCertificate("myCertificate");
         // Deleted Certificate is accessible as soon as polling beings.
         PollResponse<DeletedCertificate> deletePollResponse = deletedCertPoller.poll();
-        System.out.printf("Deleted certificate with name %s and recovery id %s", deletePollResponse.getValue().getName(),
+        LOGGER.info("Deleted certificate with name {} and recovery id {}", deletePollResponse.getValue().getName(),
             deletePollResponse.getValue().getRecoveryId());
         deletedCertificatePoller.waitForCompletion();
 
         CertificateIssuer deleteCertificateIssuer = certificateClient.deleteIssuer("myIssuer");
-        System.out.printf("Certificate issuer is permanently deleted with name %s and provider is %s \n", deleteCertificateIssuer.getName(), deleteCertificateIssuer.getProvider());
+        LOGGER.info("Certificate issuer is permanently deleted with name {} and provider is {} \n", deleteCertificateIssuer.getName(), deleteCertificateIssuer.getProvider());
 
         // To ensure certificate is deleted on server side.
         Thread.sleep(30000);
@@ -102,6 +105,9 @@ public class KeyVaultCertificates {
     }
 
     public static void main(String[] args) throws InterruptedException {
+        LOGGER.info("---------------------");
+        LOGGER.info("KEY VAULT CERTIFICATE");
+        LOGGER.info("---------------------");
         certificateClient = new CertificateClientBuilder()
             .vaultUrl(KEY_VAULT_URL)
             .credential(new DefaultAzureCredentialBuilder().build())
